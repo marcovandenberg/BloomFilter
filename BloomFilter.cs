@@ -4,6 +4,9 @@ using System.Security.Cryptography;
 
 namespace CodeKata
 {
+    /// <summary>
+    /// Simple implementation of a bloom filter.
+    /// </summary>
     public class BloomFilter
     {
         private HashAlgorithm[] _algorithms;
@@ -21,6 +24,9 @@ namespace CodeKata
                 _bloomData = LoadDictionaryIntoBloomArray();
         }
 
+        /// <summary>
+        /// The validation for the presence of key elements required for the stateful nature of the bloom filter.
+        /// </summary>
         private bool ValidateInitialisation()
         {
             if (_algorithms == null || _algorithms.Length == 0)
@@ -32,6 +38,9 @@ namespace CodeKata
             return true;
         }
 
+        /// <summary>
+        /// Initializes the bloom filter array of bits and iterates through the dictionary words loading them into the filter using the configured algorithms.
+        /// </summary>
         private BitArray LoadDictionaryIntoBloomArray()
         {
             BitArray bloomData = new BitArray(_bloomArraySize);
@@ -42,11 +51,17 @@ namespace CodeKata
             return bloomData;
         }
 
+        /// <summary>
+        /// Convenient overload for external use without exposing the raw bloom data.
+        /// </summary>
         public void AddWordToFilter(string wordToAdd)
         {
             AddWordToFilter(_bloomData, wordToAdd);
         }
 
+        /// <summary>
+        /// Add word to filter using the configured array of hash algorithms.
+        /// </summary>
         private void AddWordToFilter(BitArray bloomData, string wordToAdd)
         {
             for (int algoIndex = 0; algoIndex < _algorithms.Length; algoIndex++)
@@ -56,6 +71,11 @@ namespace CodeKata
             }
         }
 
+        /// <summary>
+        /// Returns a boolean indicating whether the bloom filter indicates the tested word was loaded. 
+        /// Calculates and checks each hash algorithm using the test word. Returns true if all relevant array bits are true. 
+        /// This can be a false positive, but will never be a false negative.
+        /// </summary>
         public bool TestFilterForWord(string wordToTest)
         {
             for (int algoIndex = 0; algoIndex < _algorithms.Length; algoIndex++)
@@ -71,6 +91,9 @@ namespace CodeKata
             return true;
         }
 
+        /// <summary>
+        /// Returns the index inside the bloom filter fore the given word and hash algorithm.
+        /// </summary>
         private int CalculateBloomPosition(string wordToTest, HashAlgorithm algorithm)
         {
             var bytes = algorithm.ComputeHash(System.Text.Encoding.UTF8.GetBytes(wordToTest));
