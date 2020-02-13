@@ -9,19 +9,22 @@ namespace CodeKata
     /// </summary>
     public class BloomFilter
     {
-        private HashAlgorithm[] _algorithms;
-        private int _bloomArraySize;
-        private string[] _dictionaryWords;
-        private BitArray _bloomData;
+        private HashAlgorithm[] algorithms;
+        private int bloomArraySize;
+        private string[] dictionaryWords;
+        private BitArray bloomData;
 
+        /// <summary>
+        /// Creates a new bloom filter with desired baseline parameters.
+        /// </summary>
         public BloomFilter(HashAlgorithm[] algorithms, int bloomArraySize, string[] dictionaryWords)
         {
-            _algorithms = algorithms;
-            _bloomArraySize = bloomArraySize;
-            _dictionaryWords = dictionaryWords;
+            this.algorithms = algorithms;
+            this.bloomArraySize = bloomArraySize;
+            this.dictionaryWords = dictionaryWords;
 
             if (ValidateInitialisation())
-                _bloomData = LoadDictionaryIntoBloomArray();
+                bloomData = LoadDictionaryIntoBloomArray();
         }
 
         /// <summary>
@@ -29,10 +32,10 @@ namespace CodeKata
         /// </summary>
         private bool ValidateInitialisation()
         {
-            if (_algorithms == null || _algorithms.Length == 0)
+            if (algorithms == null || algorithms.Length == 0)
                 throw new Exception("You must provide at least one algorithm for the bloom filter");
 
-            if (_dictionaryWords == null || _dictionaryWords.Length == 0)
+            if (dictionaryWords == null || dictionaryWords.Length == 0)
                 throw new Exception("You must provide a dictionary for the bloom filter");
 
             return true;
@@ -43,10 +46,10 @@ namespace CodeKata
         /// </summary>
         private BitArray LoadDictionaryIntoBloomArray()
         {
-            BitArray bloomData = new BitArray(_bloomArraySize);
+            BitArray bloomData = new BitArray(bloomArraySize);
 
-            for (int wordIndex = 0; wordIndex < _dictionaryWords.Length; wordIndex++)
-                AddWordToFilter(bloomData, _dictionaryWords[wordIndex]);
+            for (int wordIndex = 0; wordIndex < dictionaryWords.Length; wordIndex++)
+                AddWordToFilter(bloomData, dictionaryWords[wordIndex]);
 
             return bloomData;
         }
@@ -56,7 +59,7 @@ namespace CodeKata
         /// </summary>
         public void AddWordToFilter(string wordToAdd)
         {
-            AddWordToFilter(_bloomData, wordToAdd);
+            AddWordToFilter(bloomData, wordToAdd);
         }
 
         /// <summary>
@@ -64,9 +67,9 @@ namespace CodeKata
         /// </summary>
         private void AddWordToFilter(BitArray bloomData, string wordToAdd)
         {
-            for (int algoIndex = 0; algoIndex < _algorithms.Length; algoIndex++)
+            for (int algoIndex = 0; algoIndex < algorithms.Length; algoIndex++)
             {
-                int filterPosition = CalculateBloomPosition(wordToAdd, _algorithms[algoIndex]);
+                int filterPosition = CalculateBloomPosition(wordToAdd, algorithms[algoIndex]);
                 bloomData[filterPosition] = true;
             }
         }
@@ -78,12 +81,12 @@ namespace CodeKata
         /// </summary>
         public bool TestFilterForWord(string wordToTest)
         {
-            for (int algoIndex = 0; algoIndex < _algorithms.Length; algoIndex++)
+            for (int algoIndex = 0; algoIndex < algorithms.Length; algoIndex++)
             {
-                int bytePosition = CalculateBloomPosition(wordToTest, _algorithms[algoIndex]);
+                int bytePosition = CalculateBloomPosition(wordToTest, algorithms[algoIndex]);
 
                 //Short circuit further testing the remaining hash algorithms
-                if (_bloomData[bytePosition] == false)
+                if (bloomData[bytePosition] == false)
                     return false;
             }
 
@@ -98,7 +101,7 @@ namespace CodeKata
         {
             var bytes = algorithm.ComputeHash(System.Text.Encoding.UTF8.GetBytes(wordToTest));
             int convertedInt = Math.Abs(BitConverter.ToInt32(bytes, 0));
-            int bytePosition = convertedInt % _bloomArraySize;
+            int bytePosition = convertedInt % bloomArraySize;
             return bytePosition;
         }
     }
